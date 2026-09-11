@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modeling — Nanoplastic Research</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/" aria-label="Nanoplastic Research home">
+      <span class="brand-mark" aria-hidden="true">N</span>
+      <span class="brand-copy">
+        <strong>Nanoplastic Research</strong>
+        <small>Computational workspace</small>
+      </span>
+    </a>
+
+    <nav class="main-nav" aria-label="Primary navigation">
+      <a class="nav-item active" href="/">Modeling</a>
+      <a class="nav-item" href="/simulation">Simulation</a>
+      <a class="nav-item" href="/experiments">Experiments</a>
+      <a class="nav-item" href="/analysis">Analysis</a>
+    </nav>
+
+    <div id="apiStatus" class="system-status">
+      <i aria-hidden="true"></i>
+      <span>Checking system</span>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <div class="modeling-layout">
+      <div class="builder-column">
+        <section class="card builder-card">
+          <div class="card-header">
+            <div>
+              <h2>Model setup</h2>
+              <p>Define the structure to generate</p>
+            </div>
+          </div>
+
+          <form id="modelForm">
+            <fieldset class="form-section">
+              <legend>Structure type</legend>
+              <div class="segmented" id="familySegment">
+                <button type="button" class="segment active" data-family="small_molecule">Small molecule</button>
+                <button type="button" class="segment" data-family="polymer">Polymer</button>
+              </div>
+            </fieldset>
+
+            <input id="family" type="hidden" value="small_molecule">
+
+            <div id="smallMoleculeFields" class="form-section field-stack">
+              <div class="field">
+                <label for="compound">Molecule</label>
+                <select id="compound" class="input"><option value="dopamine">Dopamine</option></select>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="pH">Environment pH</label>
+                  <select id="pH" class="input">
+                    <option value="4">4.0</option>
+                    <option value="7" selected>7.0</option>
+                    <option value="9">9.0</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="microstate">Protonation state</label>
+                  <select id="microstate" class="input">
+                    <option value="auto">Automatic from pH</option>
+                    <option value="DAH_plus">Dopaminium (+1)</option>
+                    <option value="DA_neutral">Neutral dopamine</option>
+                    <option value="DA_zwitterion">Zwitterion (0)</option>
+                    <option value="DA_anion">Anion (-1)</option>
+                  </select>
+                </div>
+              </div>
+              <p class="field-note">pH selects a representative microstate; it is not a constant-pH simulation.</p>
+              <details class="custom-structure-options">
+                <summary>Add a custom structure</summary>
+                <div class="field-grid">
+                  <div class="field"><label for="customSmiles">SMILES</label><input id="customSmiles" class="input" type="text" placeholder="e.g. C1=CC=C(C=C1)O"></div>
+                  <div class="field"><label for="customChembl">ChEMBL ID</label><input id="customChembl" class="input" type="text" placeholder="e.g. CHEMBL59"></div>
+                </div>
+                <div class="field"><label for="customName">Display name (optional)</label><input id="customName" class="input" type="text" placeholder="Custom adsorbate"></div>
+                <p class="field-note">Provide either a SMILES or a ChEMBL identifier. ChEMBL records are resolved through the official ChEMBL API when the model is built.</p>
+              </details>
+            </div>
+
+            <div id="polymerFields" class="form-section field-stack hidden">
+              <div class="field">
+                <label for="polymer">Polymer</label>
+                <select id="polymer" class="input">
+                  <option value="PE">PE — Polyethylene</option>
+                  <option value="PP">PP — Polypropylene</option>
+                  <option value="PET">PET — Polyethylene terephthalate</option>
+                  <option value="PS">PS — Polystyrene</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <div class="range-heading">
+                  <label for="repeats">Repeat units</label>
+                  <output id="repeatsValue">6</output>
+                </div>
+                <input id="repeats" type="range" min="1" max="18" value="6" step="1">
+              </div>
+
+              <div class="field">
+                <label for="modelKind">Model level</label>
+                <select id="modelKind" class="input">
+                  <option value="molecule">Single oligomer</option>
+                  <option value="surface_patch">2 × 2 surface proxy</option>
+                </select>
+              </div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="polymerPH">Environment pH</label>
+                  <select id="polymerPH" class="input"><option value="4">4.0</option><option value="7" selected>7.0</option><option value="9">9.0</option></select>
+                </div>
+                <div class="field">
+                  <label for="temperatureK">Temperature (K)</label>
+                  <input id="temperatureK" class="input" type="number" min="200" max="500" step="0.01" value="310.15">
+                </div>
+              </div>
+              <p class="field-note">The surface proxy is not yet a density-equilibrated amorphous slab.</p>
+            </div>
+
+            <fieldset class="form-section advanced-section">
+              <legend>Generation settings</legend>
+              <div class="field">
+                <label for="engine">Modeling engine</label>
+                <select id="engine" class="input">
+                  <option value="rdkit_etkdg">RDKit ETKDGv3</option>
+                  <option value="psp">PSP — all-atom polymer builder</option>
+                  <option value="polyply">Polyply — condensed-phase builder</option>
+                </select>
+              </div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="conformers">Conformer count</label>
+                  <input id="conformers" class="input" type="number" min="1" max="32" value="6">
+                </div>
+                <div class="field">
+                  <label for="seed">Random seed</label>
+                  <input id="seed" class="input mono" type="number" value="20260826">
+                </div>
+              </div>
+            </fieldset>
+
+            <button id="buildButton" class="primary-button" type="submit">
+              <span>Build model</span>
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg>
+            </button>
+            <div class="page-task-actions"><button id="addModelTask" class="secondary-button" type="button">Add current setup to queue</button><button id="runModelQueue" class="secondary-button" type="button" disabled>Run queue</button></div>
+            <div id="modelTaskQueue" class="page-task-queue"><span>No queued model builds.</span></div>
+          </form>
+
+          <div class="presets">
+            <span class="subsection-title">Quick start</span>
+            <div class="preset-row">
+              <button class="preset" data-preset="dopamine4"><b>DA</b> pH 4</button>
+              <button class="preset" data-preset="dopamine9"><b>DA</b> pH 9</button>
+              <button class="preset" data-preset="pe9"><b>PE</b> 9-mer</button>
+              <button class="preset" data-preset="pe15"><b>PE</b> 15-mer</button>
+              <button class="preset" data-preset="pet"><b>PET</b> 2-mer</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card library-card">
+          <div class="card-header compact">
+            <div>
+              <h2>Recent models</h2>
+              <p>Local workspace history</p>
+            </div>
+            <button id="refreshHistory" class="icon-button" type="button" aria-label="Refresh model history" title="Refresh">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 7a6.5 6.5 0 1 0 .2 5.5M16 3v4h-4"/></svg>
+            </button>
+          </div>
+          <div id="modelHistory" class="model-history">
+            <div class="history-empty">No saved models yet.</div>
+          </div>
+        </section>
+      </div>
+
+      <section class="card viewer-card">
+        <div class="viewer-header">
+          <div class="viewer-title">
+            <span class="viewer-kicker">Live 3D structure</span>
+            <h2 id="modelTitle">Select or build a model</h2>
+          </div>
+          <div class="viewer-actions">
+            <label class="sr-only" for="representation">Representation</label>
+            <select id="representation" class="compact-select">
+              <option value="ball+stick">Ball & stick</option>
+              <option value="licorice">Licorice</option>
+              <option value="spacefill">Spacefill</option>
+              <option value="line">Line</option>
+            </select>
+            <button id="spinButton" class="icon-button" type="button" title="Auto rotate" aria-label="Auto rotate">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.4 6.1A6.5 6.5 0 1 0 16 12m-.6-5.9V2.8m0 3.3h-3.3"/></svg>
+            </button>
+            <button id="resetViewButton" class="icon-button" type="button" title="Reset view" aria-label="Reset view">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"/><path d="M10 2v3m0 10v3M2 10h3m10 0h3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="viewportWrap" class="viewport-wrap">
+          <div id="viewport"></div>
+          <div id="viewerEmpty" class="viewer-empty">
+            <svg class="empty-structure" viewBox="0 0 120 92" aria-hidden="true">
+              <g fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M29 55 50 35l28 8 15 26M50 35 61 17M78 43l16-17"/>
+                <circle cx="25" cy="59" r="8"/><circle cx="51" cy="34" r="9"/><circle cx="61" cy="15" r="6"/><circle cx="79" cy="44" r="8"/><circle cx="96" cy="24" r="6"/><circle cx="95" cy="72" r="9"/>
+              </g>
+            </svg>
+            <h3>3D preview</h3>
+            <p>Build a model from the settings or select a structure from recent models.</p>
+          </div>
+          <div id="viewerLoading" class="viewer-loading hidden"><i></i><span>Building structure…</span></div>
+          <div class="viewer-hint">Rotate: left drag · Zoom: scroll · Pan: right drag</div>
+        </div>
+
+        <div class="model-summary">
+          <article class="metric"><span>Formula</span><strong id="metricFormula">—</strong></article>
+          <article class="metric"><span>Atoms</span><strong id="metricAtoms">—</strong></article>
+          <article class="metric"><span>Net charge</span><strong id="metricCharge">—</strong></article>
+          <article class="metric"><span>Engine</span><strong id="metricEngine">—</strong></article>
+          <article class="metric"><span>Build time</span><strong id="metricTime">—</strong></article>
+        </div>
+
+        <div class="details-grid">
+          <section class="detail-panel">
+            <h3>Model details</h3>
+            <dl id="modelDetails" class="detail-list">
+              <div><dt>Status</dt><dd>No model loaded</dd></div>
+            </dl>
+          </section>
+          <section class="detail-panel warning-panel">
+            <h3>Scientific notes</h3>
+            <div id="warnings" class="warning-list"><p>Method limitations and validation notes will appear after model generation.</p></div>
+          </section>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/vendor/ngl.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

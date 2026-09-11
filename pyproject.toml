@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nanoplastic-modeling-studio"
+version = "0.1.0"
+description = "Local molecular modeling, pose generation and xTB analysis workspace"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1", "numpy>=1.26,<3", "rdkit>=2024.3", "pydantic>=2,<3"]
+
+[project.optional-dependencies]
+dev = ["httpx>=0.27", "playwright>=1.50"]
+
+[project.scripts]
+nanoplastic-studio = "modeling.app.__main__:main"
+
+[tool.setuptools]
+packages = ["modeling.app"]
+package-dir = {"modeling.app" = "."}
+
+[tool.setuptools.package-data]
+"modeling.app" = ["static/*.html", "static/*.js", "static/*.css", "static/vendor/*"]

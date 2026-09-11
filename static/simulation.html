@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulation — Nanoplastic Research</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/" aria-label="Nanoplastic Research home">
+      <span class="brand-mark" aria-hidden="true">N</span>
+      <span class="brand-copy"><strong>Nanoplastic Research</strong><small>Computational workspace</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Primary navigation">
+      <a class="nav-item" href="/">Modeling</a>
+      <a class="nav-item active" href="/simulation">Simulation</a>
+      <a class="nav-item" href="/experiments">Experiments</a>
+      <a class="nav-item" href="/analysis">Analysis</a>
+    </nav>
+    <div id="apiStatus" class="system-status"><i aria-hidden="true"></i><span>Checking system</span></div>
+  </header>
+
+  <main class="page-shell simulation-shell pose-simulation-shell pose-generation-page">
+    <section class="pose-set-workspace">
+      <div class="simulation-left-column">
+      <section class="card pose-setup-card pose-set-config-card">
+        <div class="card-header compact">
+          <h2>Pose set generation</h2>
+          <nav class="simulation-page-tabs simulation-flow-tabs" aria-label="Simulation workflow"><a class="active" href="/simulation"><span>01</span> Generate poses</a><a href="/simulation/run"><span>02</span> Run simulation</a></nav>
+        </div>
+
+        <section class="pose-section pose-definition-section">
+          <div class="pose-section-heading"><span>01</span><div><b>Pose set definition</b></div></div>
+          <div class="pose-subsection">
+            <div class="pose-subsection-label">System models</div>
+          <div class="field-grid">
+            <div class="field"><label for="surfaceModel">Polymer surface</label><select id="surfaceModel" class="input"><option value="">Loading polymer models…</option></select></div>
+            <div class="field"><label for="adsorbateModel">Adsorbate</label><select id="adsorbateModel" class="input"><option value="">Loading dopamine models…</option></select></div>
+          </div>
+          <div id="systemSummary" class="pose-system-summary"><span>Loading model catalog…</span></div>
+          </div>
+
+          <div class="pose-subsection pose-generation-subsection">
+            <div class="pose-subsection-label">Surface sampling</div>
+          <div class="surface-scan-method">
+            <span class="method-chip">SASA grid</span>
+            <div><b>Uniform anchor placement</b><small>Coverage across exposed faces, sides, and chain ends.</small></div>
+          </div>
+          <div class="field-grid surface-scan-grid">
+            <div class="field"><label for="surfaceSiteCount">Surface sites</label><input id="surfaceSiteCount" class="input" type="number" min="1" max="25" value="5"></div>
+            <div class="field"><label for="orientationsPerSite">Orientations / site</label><input id="orientationsPerSite" class="input" type="number" min="1" max="8" value="4"></div>
+            <div class="field"><label for="poseDistance">Surface distance (Å)</label><input id="poseDistance" class="input" type="number" min="2" max="8" step="0.1" value="3.2"></div>
+            <div class="field"><label for="surfaceProbeRadius">SASA probe (Å)</label><input id="surfaceProbeRadius" class="input" type="number" min="0" max="3" step="0.1" value="1.4"></div>
+            <div class="field"><label for="poseSeed">Seed</label><input id="poseSeed" class="input mono" type="number" value="20260827"></div>
+          </div>
+          <details class="crest-options">
+            <summary>Optional CREST local refinement</summary>
+            <div class="field-grid crest-parameters">
+              <div class="field"><label for="crestSolvent">CREST solvent</label><select id="crestSolvent" class="input"><option value="none">Gas phase</option><option value="water" selected>ALPB water</option></select></div>
+              <div class="field"><label for="crestTopK">Variants / selected pose</label><input id="crestTopK" class="input" type="number" min="1" max="10" value="3"></div>
+            </div>
+            <p id="poseMethodNote" class="field-note">CREST refines selected surface seeds with the polymer fixed; it does not generate whole-surface coverage.</p>
+          </details>
+          <div class="pose-actions pose-build-actions"><button id="generatePoseSet" class="primary-button" type="button">Generate surface pose set <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg></button></div>
+          <div class="page-task-actions"><button id="addPoseTask" class="secondary-button" type="button">Add pose setup to queue</button><button id="runPoseQueue" class="secondary-button" type="button" disabled>Run queue</button></div><div id="poseTaskQueue" class="page-task-queue"><span>No queued pose jobs.</span></div>
+          </div>
+        </section>
+
+        <section class="pose-section simulation-inline-section">
+          <div class="pose-section-heading"><span>02</span><div><b>Simulation</b><small>Run GFN2-xTB on the selected pose members</small></div></div>
+          <div class="simulation-control-fields">
+            <div class="field"><label for="optimizationMode">Optimization mode</label><select id="optimizationMode" class="input"><option value="surface_fixed" selected>Surface-fixed screen</option><option value="full">Full complex refinement</option></select></div>
+            <div class="field"><label for="simulationSolvent">Solvent model</label><select id="simulationSolvent" class="input"><option value="none">Gas phase</option><option value="water" selected>ALPB water</option></select></div>
+            <div class="field"><label for="simulationTimeout">Timeout (s)</label><input id="simulationTimeout" class="input" type="number" min="30" max="3600" step="30" value="300"></div>
+            <div class="field"><label for="simulationPoseCount">Poses to simulate</label><input id="simulationPoseCount" class="input" type="number" min="1" max="100" value="8"></div>
+          </div>
+          <div class="engine-strip"><span id="xtbBadge" class="engine-badge">xTB · checking</span><span id="crestBadge" class="engine-badge muted">CREST · checking</span><span id="selectionBadge" class="engine-badge muted">0 selected</span></div>
+          <div id="simulationRunPlan" class="simulation-run-plan" aria-live="polite">
+            <div><span>Pose coverage</span><b>Set surface sites and orientations</b></div>
+            <div><span>xTB batch</span><b>Create or open a pose set</b></div>
+            <div><span>Scientific output</span><b>Optimized local minima</b></div>
+          </div>
+          <div class="simulation-control-action inline-simulation-action"><button id="selectBestPosesButton" class="secondary-button" type="button" disabled>Select best 8</button><button id="runXtbButton" class="primary-button" type="button" disabled>Run xTB on selected</button></div>
+          <p id="optimizationModeNote" class="field-note simulation-selection-note">Surface-fixed screening keeps every polymer atom fixed so surface sites remain comparable. Use full refinement only for selected representatives. Direct runs produce local minima; matched-fragment Eads analysis is created in an experiment cohort.</p>
+        </section>
+
+        <div class="cli-preview pose-cli-preview"><div class="cli-preview-head"><span>CLI preview</span><button id="copyCliButton" class="text-button" type="button">Copy command</button></div><code id="cliPreview">python -m modeling.app.cli pose-create</code></div>
+      </section>
+
+      <section class="card pose-set-table-card">
+        <div class="card-header compact pose-library-heading"><div><span class="workspace-kicker">POSE LIBRARY</span><h2>Saved pose sets</h2></div><div class="pose-library-actions"><span id="poseSetLibraryMeta" class="library-count">Loading…</span><a class="secondary-button compact-button" href="/simulation/run">Open xTB workspace →</a></div></div>
+        <div class="table-scroll pose-set-table-scroll"><table class="pose-set-table"><thead><tr><th class="pose-set-toggle-header"></th><th>Pose set</th><th>Method</th><th>Poses</th><th>Charge</th><th>Created</th><th></th></tr></thead><tbody id="poseSetResults"><tr><td colspan="7" class="table-empty">Loading pose sets…</td></tr></tbody></table></div>
+        <div id="jobProgress" class="job-progress hidden"><span></span><div><i></i></div><b>queued</b></div>
+      </section>
+      </div>
+
+      <section class="card pose-viewer-card">
+        <div class="viewer-header">
+          <div class="viewer-title"><span class="viewer-kicker">LIVE 3D POSE VIEWER</span><h2 id="simulationModelTitle">Create or open a pose set</h2></div>
+          <div class="viewer-actions">
+            <label class="sr-only" for="overlayPageSize">Overlay page size</label><select id="overlayPageSize" class="compact-select"><option value="4">4 poses</option><option value="8" selected>8 poses</option><option value="12">12 poses</option><option value="16">16 poses</option><option value="all">Show all</option></select>
+            <label class="sr-only" for="poseColorMode">Pose color palette</label><select id="poseColorMode" class="compact-select"><option value="pose" selected>One color per pose</option><option value="element">Element colors</option></select>
+            <label class="sr-only" for="overlayStyle">Overlay style</label><select id="overlayStyle" class="compact-select"><option value="ghost" selected>Ghost surface</option><option value="solid">Solid</option></select>
+            <label class="sr-only" for="simulationRepresentation">Representation</label><select id="simulationRepresentation" class="compact-select"><option value="ball+stick" selected>Ball &amp; stick</option><option value="licorice">Licorice</option><option value="spacefill">Spacefill</option><option value="line">Line</option></select>
+            <button id="simulationResetView" class="icon-button" type="button" title="Reset view" aria-label="Reset view">↺</button>
+          </div>
+        </div>
+        <div id="simulationViewportWrap" class="pose-viewport-wrap">
+          <div id="simulationViewport"></div>
+          <div id="simulationViewerEmpty" class="viewer-empty"><span class="viewer-empty-icon">⌁</span><strong>Select poses below</strong><span>Only checked poses are shown in the 3D overlay.</span></div>
+          <div id="simulationViewerLoading" class="viewer-loading hidden"><span class="spinner"></span><span>Loading coordinates…</span></div>
+          <div class="viewer-overlay"><span id="simulationViewerLabel">No pose selected</span></div>
+        </div>
+        <div class="pose-browser">
+          <div class="pose-browser-toolbar"><span id="posePageLabel">No poses</span><div><button id="previousPosePage" class="icon-button" type="button" aria-label="Previous pose page">←</button><button id="nextPosePage" class="icon-button" type="button" aria-label="Next pose page">→</button></div></div>
+          <div id="poseCardGrid" class="pose-card-grid"><div class="pose-grid-empty">No poses loaded.</div></div>
+        </div>
+      </section>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/vendor/ngl.js"></script>
+  <script src="/static/simulation.js"></script>
+</body>
+</html>

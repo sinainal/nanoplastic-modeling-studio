@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Experiments — Nanoplastic Research</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/" aria-label="Nanoplastic Research home"><span class="brand-mark" aria-hidden="true">N</span><span class="brand-copy"><strong>Nanoplastic Research</strong><small>Computational workspace</small></span></a>
+    <nav class="main-nav" aria-label="Primary navigation"><a class="nav-item" href="/">Modeling</a><a class="nav-item" href="/simulation">Simulation</a><a class="nav-item active" href="/experiments">Experiments</a><a class="nav-item" href="/analysis">Analysis</a></nav>
+    <div id="apiStatus" class="system-status"><i aria-hidden="true"></i><span>Checking system</span></div>
+  </header>
+  <main class="page-shell experiments-page composer-page">
+    <section class="composer-workspace">
+      <section class="card composer-controls-card">
+        <div class="experiment-heading"><div><span class="workspace-kicker">END-TO-END EXPERIMENTS</span><h1>Plan and run complete workflows</h1><p>Each workflow explicitly follows model construction → surface poses → GFN2-xTB. Add multiple workflows, optionally starting from saved polymer structures, and inspect every generated output live.</p></div></div>
+        <div id="workItems" class="work-items" aria-live="polite"></div>
+        <section class="composer-runbar"><div><span id="workSummary">Experiment not configured</span><p id="workDescription">Configure all three stages, then use Run all. Each stage also has its own partial-run action.</p></div><button id="runExperimentButton" class="primary-button" type="button" disabled>Run all</button></section>
+        <section class="composer-queue"><div class="section-heading-row"><div><span class="workspace-kicker">LIVE QUEUE</span><h2>Sequential execution</h2></div><span id="experimentJobStatus" class="job-status-chip">Idle</span></div><div id="experimentQueue" class="experiment-queue"><div class="table-empty">The work queue will be listed here as it begins. New structures and optimized complexes update the viewer on the right.</div></div></section>
+      </section>
+      <section class="card experiment-viewer-card"><div class="viewer-header"><div class="viewer-title"><span class="viewer-kicker">LIVE STRUCTURE VIEW</span><h2 id="experimentViewerTitle">Select a batch target</h2></div><div class="viewer-actions"><label class="sr-only" for="experimentRepresentation">Representation</label><select id="experimentRepresentation" class="compact-select"><option value="ball+stick">Ball &amp; stick</option><option value="licorice">Licorice</option><option value="spacefill">Spacefill</option><option value="line">Line</option></select><button id="experimentResetView" class="icon-button" type="button" aria-label="Reset view">↺</button></div></div><div class="experiment-viewport-wrap"><div id="experimentViewport"></div><div id="experimentViewerEmpty" class="viewer-empty"><span class="viewer-empty-icon">⌁</span><strong>Work-item preview</strong><span>Select a saved structure in a card or start the queue to inspect a created structure here.</span></div><div id="experimentViewerLoading" class="viewer-loading hidden"><span class="spinner"></span><span>Loading coordinates…</span></div><div class="viewer-overlay"><span id="experimentViewerLabel">No batch target selected</span></div></div><div class="live-output-browser"><div><span>LIVE OUTPUTS</span><b>Model, pose, and optimized structures</b></div><div id="liveOutputs" class="live-output-list"><span>No outputs yet.</span></div></div><div class="experiment-viewer-details"><div><span>Work items</span><b id="viewerModeMetric">0</b></div><div><span>Current unit</span><b id="viewerUnitMetric">—</b></div><div><span>Progress</span><b id="viewerProgressMetric">0 / 0</b></div></div></section>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/vendor/ngl.js"></script>
+  <script src="/static/experiments.js"></script>
+</body>
+</html>

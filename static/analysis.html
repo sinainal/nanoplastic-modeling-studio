@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Analysis — Nanoplastic Research</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/" aria-label="Nanoplastic Research home">
+      <span class="brand-mark" aria-hidden="true">N</span>
+      <span class="brand-copy"><strong>Nanoplastic Research</strong><small>Computational workspace</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Primary navigation">
+      <a class="nav-item" href="/">Modeling</a>
+      <a class="nav-item" href="/simulation">Simulation</a>
+      <a class="nav-item" href="/experiments">Experiments</a>
+      <a class="nav-item active" href="/analysis">Analysis</a>
+    </nav>
+    <div id="apiStatus" class="system-status"><i aria-hidden="true"></i><span>Checking system</span></div>
+  </header>
+
+  <main class="page-shell analysis-shell">
+    <section class="analysis-workspace">
+      <div class="analysis-left-column">
+    <section class="card cohort-dashboard" aria-labelledby="cohortTitle">
+      <div class="cohort-toolbar">
+        <div>
+          <span class="workspace-kicker">ANALYSIS COHORT</span>
+          <h1 id="cohortTitle">Comparative interaction analysis</h1>
+          <p id="cohortProtocol">Loading a matched-reference experiment…</p>
+        </div>
+        <div class="cohort-picker">
+          <label for="cohortSelect">Experiment</label>
+          <select id="cohortSelect" class="input"><option value="">Loading cohorts…</option></select>
+        </div>
+      </div>
+      <div id="cohortMetrics" class="cohort-metrics" aria-live="polite"></div>
+      <div class="cohort-grid">
+        <section class="cohort-panel cohort-energy-panel">
+          <div class="cohort-panel-heading"><div><h2>Interaction-energy profile</h2><p>Median Eads with interquartile range; more negative is stronger in this static screen.</p></div><span class="metric-badge">kcal mol⁻¹</span></div>
+          <div id="cohortEnergyGrid" class="cohort-energy-grid"><div class="chart-empty">Loading cohort summary…</div></div>
+        </section>
+        <section class="cohort-panel">
+          <div class="cohort-panel-heading"><div><h2>Rank and confidence</h2><p>Ranks are independent at each oligomer size.</p></div><span class="metric-badge">median</span></div>
+          <div id="cohortRanks" class="cohort-ranks"><div class="chart-empty">Loading ranking…</div></div>
+        </section>
+        <section class="cohort-panel cohort-qc-panel">
+          <div class="cohort-panel-heading"><div><h2>Quality control</h2><p>Checks required before comparing polymer groups.</p></div><span id="cohortQcBadge" class="validation-pill pending">Checking</span></div>
+          <div id="cohortQC" class="cohort-qc"><div class="chart-empty">Loading checks…</div></div>
+        </section>
+      </div>
+    </section>
+
+      <section class="card analysis-results-card">
+        <div class="card-header compact analysis-card-heading">
+          <div>
+            <h2>Raw xTB result browser</h2>
+            <p id="analysisTableMeta">Inspect individual structures and diagnostics. Cohort Eads values are shown above.</p>
+          </div>
+          <div class="results-header-actions"><span id="analysisResultCount" class="folder-count">—</span><button id="refreshAnalysis" class="icon-button" type="button" title="Refresh results" aria-label="Refresh results">↻</button></div>
+        </div>
+
+        <div class="analysis-filter-grid">
+          <div class="analysis-filter analysis-filter-search">
+            <label for="analysisSearch">Search</label>
+            <input id="analysisSearch" class="input" type="search" placeholder="Model, engine, microstate or ID">
+          </div>
+          <div class="analysis-filter">
+            <label for="analysisPolymer">Target</label>
+            <select id="analysisPolymer" class="input">
+              <option value="all">All targets</option><option value="PE">PE</option><option value="PP">PP</option><option value="PET">PET</option><option value="PS">PS</option><option value="dopamine">Dopamine</option>
+            </select>
+          </div>
+          <div class="analysis-filter">
+            <label for="analysisEngine">Engine</label>
+            <select id="analysisEngine" class="input">
+              <option value="all">All engines</option><option value="RDKit ETKDGv3">RDKit ETKDGv3</option><option value="PSP MoleculeBuilder">PSP MoleculeBuilder</option><option value="Polyply gen_params + gen_coords">Polyply gen_params + gen_coords</option><option value="Polyply gen_params + RDKit coordinate fallback">Polyply + fallback</option>
+            </select>
+          </div>
+          <div class="analysis-filter">
+            <label for="analysisRepeats">Size</label>
+            <select id="analysisRepeats" class="input">
+              <option value="all">All sizes</option><option value="3">3-mer</option><option value="4">4-mer</option><option value="6">6-mer</option><option value="9">9-mer</option><option value="15">15-mer</option>
+            </select>
+          </div>
+          <div class="analysis-filter">
+            <label for="analysisStatus">Status</label>
+            <select id="analysisStatus" class="input">
+              <option value="all">All results</option><option value="completed">Completed only</option><option value="review">Needs review</option>
+            </select>
+          </div>
+          <div class="analysis-filter analysis-filter-sort">
+            <label for="analysisSort">Sort by</label>
+            <div class="sort-control">
+              <select id="analysisSort" class="input"><option value="run">Run order</option><option value="energy">Total energy</option><option value="perAtom">Energy / atom</option><option value="gap">H–L gap</option><option value="runtime">Runtime</option><option value="atoms">Atoms</option></select>
+              <button id="analysisSortDirection" class="icon-button" type="button" title="Toggle sort direction" aria-label="Toggle sort direction">↓</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="analysis-table-meta"><span id="analysisSummary" class="analysis-summary">Saved calculation runs</span><button id="clearAnalysisFilters" class="text-button" type="button">Clear filters</button></div>
+        <div class="table-scroll analysis-results-scroll">
+          <table class="analysis-results-table">
+            <thead><tr><th>Result</th><th>Target / state</th><th>Atoms</th><th>Total E</th><th>E / atom</th><th>H–L gap</th><th>Runtime</th><th>Status</th><th></th></tr></thead>
+            <tbody id="xtbTable"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card analysis-detail-dock">
+        <div class="analysis-dock-heading">
+          <div><h2>Diagnostics</h2><p>Open one analytical view at a time.</p></div>
+          <div class="analysis-tabs" role="tablist" aria-label="Analysis detail panels">
+            <button class="analysis-tab active" type="button" role="tab" aria-selected="true" data-panel="performance">Performance</button>
+            <button class="analysis-tab" type="button" role="tab" aria-selected="false" data-panel="energy">Energy &amp; size</button>
+            <button class="analysis-tab" type="button" role="tab" aria-selected="false" data-panel="electronic">Electronic</button>
+            <button class="analysis-tab" type="button" role="tab" aria-selected="false" data-panel="comparison">Comparison</button>
+          </div>
+        </div>
+        <div class="analysis-panel active" data-panel-content="performance" role="tabpanel"><div class="analysis-plot-grid two-up"><section class="analysis-plot-card"><div class="plot-heading"><h3>xTB runtime</h3><span>Seconds per saved model</span></div><div id="xtbRuntimeChart" class="bar-chart" role="img" aria-label="xTB runtime chart"></div></section><section class="analysis-plot-card"><div class="plot-heading"><h3>Build time by engine</h3><span>Generation time for filtered models</span></div><div id="engineChart" class="bar-chart" role="img" aria-label="Build time chart"></div></section></div></div>
+        <div class="analysis-panel" data-panel-content="energy" role="tabpanel" hidden><div class="analysis-plot-grid two-up"><section class="analysis-plot-card"><div class="plot-heading"><h3>Total energy</h3><span>Hartree; compare only matched composition</span></div><div id="xtbEnergyChart" class="bar-chart" role="img" aria-label="xTB energy chart"></div></section><section class="analysis-plot-card"><div class="plot-heading"><h3>Size-normalized energy</h3><span>eV per atom; diagnostic only</span></div><div id="xtbNormalizedChart" class="bar-chart" role="img" aria-label="Size-normalized energy chart"></div></section><section class="analysis-plot-card"><div class="plot-heading"><h3>Repeat-unit coverage</h3><span>Generated polymer models</span></div><div id="repeatChart" class="dot-chart" role="img" aria-label="Repeat unit chart"></div></section></div></div>
+        <div class="analysis-panel" data-panel-content="electronic" role="tabpanel" hidden><div class="analysis-plot-grid two-up"><section class="analysis-plot-card"><div class="plot-heading"><h3>HOMO–LUMO gap</h3><span>eV; electronic descriptor, not affinity</span></div><div id="xtbGapChart" class="bar-chart" role="img" aria-label="HOMO LUMO gap chart"></div></section><section class="analysis-plot-card plot-note"><h3>How to read this panel</h3><p>A wider gap is an electronic descriptor. It is not a docking score, adsorption energy, or binding free energy.</p><p>Use raw logs and matched complex–fragment calculations for interaction claims.</p></section></div></div>
+        <div class="analysis-panel" data-panel-content="comparison" role="tabpanel" hidden><div class="comparison-callout"><strong>Comparison rule:</strong> total energies are meaningful only for identical composition. Use E/atom only as a rough size diagnostic.</div><div class="table-scroll"><table class="comparison-table"><thead><tr><th>Group</th><th>Models</th><th>Atoms</th><th>Total E range (Eh)</th><th>E/atom range (eV)</th><th>Best normalized engine</th><th>Median runtime</th><th>Assessment</th></tr></thead><tbody id="comparisonTable"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody></table></div><details class="metadata-disclosure"><summary>Generated structure metadata</summary><div class="table-scroll"><table><thead><tr><th>Model</th><th>Polymer</th><th>Repeats</th><th>Engine</th><th>Atoms</th><th>Formula</th><th>Build time</th><th>Validation</th></tr></thead><tbody id="modelTable"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody></table></div></details></div>
+      </section>
+
+      <details class="card analysis-notes"><summary>Method notes and interpretation limits</summary><div class="analysis-glossary"><p><b>Total energy (Eh):</b> Electronic energy of the complete model; it is not an affinity score across different oligomer sizes.</p><p><b>E/atom and Δ group:</b> Rough diagnostics only. Adsorption requires matched complex-minus-fragment interaction energies.</p><p><b>HOMO–LUMO gap:</b> Electronic descriptor. <b>Gradient:</b> residual force-like convergence metric; smaller is better.</p><p><b>ALPB water:</b> Implicit aqueous environment; this is not explicit-water MD or a free-energy calculation.</p></div></details>
+      </div>
+      <section class="card analysis-inspector-card">
+        <div class="card-header compact analysis-inspector-heading">
+          <div><h2>Structure inspector</h2><p>Selected xTB geometry</p></div>
+          <div class="inspector-controls">
+            <label class="sr-only" for="analysisResultSelect">Result</label>
+            <select id="analysisResultSelect" class="compact-select"><option value="">No completed result</option></select>
+            <label class="sr-only" for="analysisStructureType">Coordinates</label>
+            <select id="analysisStructureType" class="compact-select"><option value="xtbopt.xyz">Optimized</option><option value="input.xyz">Input</option></select>
+          </div>
+        </div>
+        <div class="analysis-inspector-viewport">
+          <div id="analysisViewport" class="viewport"></div>
+          <div id="analysisViewerLoading" class="viewer-loading hidden"><span class="spinner"></span><span>Loading coordinates…</span></div>
+          <div id="analysisViewerEmpty" class="viewer-empty"><span class="viewer-empty-icon">⌁</span><strong>Select a completed result</strong><span>The selected geometry will appear here.</span></div>
+          <div class="viewer-overlay"><span id="analysisViewerLabel">No structure selected</span><button id="analysisResetView" class="icon-button" type="button" aria-label="Reset view">↺</button></div>
+        </div>
+        <div id="xtbMetrics" class="xtb-metrics inspector-metrics">
+          <article class="xtb-metric"><span>Jobs</span><strong>—</strong></article><article class="xtb-metric"><span>Completed</span><strong>—</strong></article><article class="xtb-metric"><span>Review</span><strong>—</strong></article><article class="xtb-metric"><span>Median runtime</span><strong>—</strong></article>
+        </div>
+        <details class="inspector-data"><summary>Run details</summary><dl id="analysisResultDetails" class="inspector-details-list"><div><dt>Result</dt><dd>No result selected</dd></div></dl></details>
+        <details class="inspector-interpretation"><summary>Interpretation</summary><div id="analysisQuickRead" class="analysis-quick-read">Select a result to see a short interpretation.</div><div id="analysisResultMeaning" class="inspector-meaning">The selected xTB fields and their scientific limits will appear here.</div></details>
+        <details class="inspector-files"><summary>Raw files and downloads</summary><div id="analysisResultLinks" class="inspector-links"></div></details>
+      </section>
+    </section>
+
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/vendor/ngl.js"></script>
+  <script src="/static/analysis.js"></script>
+  <script src="/static/cohort.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Run xTB — Nanoplastic Research</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/" aria-label="Nanoplastic Research home"><span class="brand-mark" aria-hidden="true">N</span><span class="brand-copy"><strong>Nanoplastic Research</strong><small>Computational workspace</small></span></a>
+    <nav class="main-nav" aria-label="Primary navigation"><a class="nav-item" href="/">Modeling</a><a class="nav-item active" href="/simulation">Simulation</a><a class="nav-item" href="/experiments">Experiments</a><a class="nav-item" href="/analysis">Analysis</a></nav>
+    <div id="apiStatus" class="system-status"><i aria-hidden="true"></i><span>Checking system</span></div>
+  </header>
+
+  <main class="page-shell simulation-run-page">
+    <section class="run-workspace">
+      <section class="card run-control-card">
+        <div class="card-header compact run-card-heading">
+          <div><h2>Simulation batch</h2><p>Choose a saved pose set and optimize the selected members with GFN2-xTB.</p></div>
+          <nav class="simulation-page-tabs simulation-flow-tabs" aria-label="Simulation workflow"><a href="/simulation"><span>01</span> Generate poses</a><a class="active" href="/simulation/run"><span>02</span> Run simulation</a></nav>
+        </div>
+        <div class="field"><label for="runPoseSetSelect">Saved pose set</label><select id="runPoseSetSelect" class="input"><option>Loading pose sets…</option></select></div>
+        <div id="runSetSummary" class="pose-system-summary"><span>Loading saved pose set…</span></div>
+        <section class="run-parameters">
+          <div class="pose-section-heading"><span>01</span><div><b>Optimization settings</b><small>Use surface-fixed for screening; reserve full refinement for selected representatives.</small></div></div>
+          <div class="simulation-control-fields">
+            <div class="field"><label for="runOptimizationMode">Optimization mode</label><select id="runOptimizationMode" class="input"><option value="surface_fixed" selected>Surface-fixed screen</option><option value="full">Full complex refinement</option></select></div>
+            <div class="field"><label for="runSolvent">Solvent model</label><select id="runSolvent" class="input"><option value="none">Gas phase</option><option value="water" selected>ALPB water</option></select></div>
+            <div class="field"><label for="runTimeout">Timeout (s)</label><input id="runTimeout" class="input" type="number" min="30" max="3600" step="30" value="300"></div>
+          </div>
+          <div class="engine-strip"><span id="runXtbBadge" class="engine-badge">xTB · checking</span><span id="runSelectionBadge" class="engine-badge muted">0 selected</span></div>
+          <div id="runBatchPreview" class="simulation-run-plan"><div><span>Batch</span><b>Choose pose members</b></div><div><span>Mode</span><b>Surface-fixed screen</b></div><div><span>Output</span><b>Optimized local minima</b></div></div>
+          <div class="run-actions"><button id="runXtbButton" class="primary-button" type="button" disabled>Run GFN2-xTB batch</button></div>
+          <div class="page-task-actions"><button id="addXtbTask" class="secondary-button" type="button">Add selected batch to queue</button><button id="runXtbQueue" class="secondary-button" type="button" disabled>Run queue</button></div><div id="xtbTaskQueue" class="page-task-queue"><span>No queued xTB batches.</span></div>
+          <p class="field-note">This action creates optimized local minima. Matched-fragment references are required before an adsorption-energy comparison is made in Analysis.</p>
+        </section>
+        <div id="runJobProgress" class="job-progress hidden"><span></span><div><i></i></div><b>queued</b></div>
+      </section>
+
+      <section class="card run-viewer-card">
+        <div class="viewer-header"><div class="viewer-title"><span class="viewer-kicker">LIVE 3D POSE VIEWER</span><h2 id="runViewerTitle">Choose a pose set</h2></div><div class="viewer-actions"><label class="sr-only" for="runOverlayCount">Overlay page size</label><select id="runOverlayCount" class="compact-select"><option value="4">4 poses</option><option value="8" selected>8 poses</option><option value="12">12 poses</option><option value="16">16 poses</option><option value="all">Show all</option></select><label class="sr-only" for="runColorMode">Pose color palette</label><select id="runColorMode" class="compact-select"><option value="pose" selected>One color per pose</option><option value="element">Element colors</option></select><label class="sr-only" for="runOverlayStyle">Overlay style</label><select id="runOverlayStyle" class="compact-select"><option value="ghost" selected>Ghost surface</option><option value="solid">Solid</option></select><label class="sr-only" for="runRepresentation">Representation</label><select id="runRepresentation" class="compact-select"><option value="ball+stick" selected>Ball &amp; stick</option><option value="licorice">Licorice</option><option value="spacefill">Spacefill</option><option value="line">Line</option></select><button id="runResetView" class="icon-button" type="button" aria-label="Reset view">↺</button></div></div>
+        <div class="run-viewport-wrap"><div id="runViewport"></div><div id="runViewerEmpty" class="viewer-empty"><span class="viewer-empty-icon">⌁</span><strong>Select pose members</strong><span>Checked poses appear together in the 3D overlay.</span></div><div id="runViewerLoading" class="viewer-loading hidden"><span class="spinner"></span><span>Loading coordinates…</span></div><div class="viewer-overlay"><span id="runViewerLabel">No pose selected</span></div></div>
+        <div class="pose-browser run-pose-browser"><div class="pose-browser-toolbar"><span id="runPosePageLabel">No poses</span><div><button id="runPreviousPosePage" class="icon-button" type="button" aria-label="Previous pose page">←</button><button id="runNextPosePage" class="icon-button" type="button" aria-label="Next pose page">→</button></div></div><div id="runPoseCardGrid" class="pose-card-grid"><div class="pose-grid-empty">No poses loaded.</div></div></div>
+        <div class="run-viewer-footer"><span id="runViewerMeta">No pose set loaded</span><a href="/analysis" class="text-button">Open analysis →</a></div>
+      </section>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/vendor/ngl.js"></script>
+  <script src="/static/simulation-run.js"></script>
+</body>
+</html>
